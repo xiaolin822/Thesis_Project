@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="seller" />
+        <module name="sdk-core" />
+        <module name="sidecar-emitter" />
+        <module name="ShimLayer" />
+        <module name="cart" />
+        <module name="vmodb-adapter" />
+        <module name="proxy-tpcc" />
+        <module name="warehouse-tpcc" />
+        <module name="modb" />
+        <module name="common" />
+        <module name="payment" />
+        <module name="stock" />
+        <module name="order" />
+        <module name="product" />
+        <module name="coordinator" />
+        <module name="shipment" />
+        <module name="test" />
+        <module name="modb-common" />
+        <module name="inventory-tpcc" />
+        <module name="order-tpcc" />
+        <module name="proxy" />
+        <module name="web_common" />
+        <module name="common-tpcc" />
+        <module name="sdk-embed" />
+        <module name="modb-api" />
+        <module name="customer" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="cart" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="common" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="common-tpcc" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="coordinator" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="customer" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="inventory-tpcc" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="modb" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="modb-api" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="modb-common" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="order" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="order-tpcc" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="payment" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="product" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="proxy" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="proxy-tpcc" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="sdk-core" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="sdk-embed" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="seller" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="shipment" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="stock" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="test" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="vmodb-adapter" options="-parameters" />
+      <module name="warehouse-tpcc" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+      <module name="web_common" options="--enable-preview --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -parameters -Xlint:deprecation -Xlint:path -Xlint:serial -Xlint:unchecked -Xmaxerrs 10000 -Xmaxwarns 999999" />
+    </option>
+  </component>
+</project>
