@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  #1. Kafka
+  # 1. Kafka 基础设施
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka-broker
@@ -32,12 +30,8 @@ services:
       retries: 15
     deploy:
       resources:
-        limits:
-          cpus: '1.5'
-          memory: 4G
-        reservations:
-          cpus: '1.5'
-          memory: 4G
+        limits: { cpus: '1.5', memory: 4G }
+        reservations: { cpus: '1.5', memory: 4G }
 
   kafka-init:
     image: confluentinc/cp-kafka:7.6.1
@@ -48,16 +42,8 @@ services:
         condition: service_healthy
     command: >
       bash -c "kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic invoice_issued --partitions 1 --replication-factor 1"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 256M
 
-  #2. vMODB & Sidecar Emitter
+  # 2. vMODB 大总管（网络宿主底座：收拢所有内部数据库的端口平面）
   vmodb-proxy:
     build: { context: ./vMODB/marketplace/proxy, dockerfile: Dockerfile }
     container_name: vmodb-proxy
@@ -66,54 +52,64 @@ services:
     ports:
       - "8091:8091"
       - "8080:8080" # cart
-      - "8081:8081" # product
+      - "8081:8081" # order
       - "8082:8082" # stock
-      - "8083:8083" # order
+      - "8083:8083" # product
+    restart: on-failure
     volumes:
       - vmodb-shared-space:/tmp
       - vmodb-shared-space:/root/vms
-    depends_on:
-      vmodb-cart:
-        condition: service_started
-      vmodb-order:
-        condition: service_started
-      vmodb-product:
-        condition: service_started
-      vmodb-stock:
-        condition: service_started
-      vmodb-shipment:
-        condition: service_started
-      vmodb-customer:
-        condition: service_started
-      vmodb-payment:
-        condition: service_started
-      vmodb-seller:
-        condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 1G
 
+  # 3. vMODB 子数据库（网络全部斩断依赖，直接强行注入 proxy 空间）
   vmodb-cart:
     build: { context: ./vMODB/marketplace/cart, dockerfile: Dockerfile }
     container_name: vmodb-cart
     network_mode: "service:vmodb-proxy"
-    ports:
-      - "8080:8080"
     volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 512M
-        reservations:
-          cpus: '0.3'
-          memory: 512M
 
+  vmodb-order:
+    build: { context: ./vMODB/marketplace/order, dockerfile: Dockerfile }
+    container_name: vmodb-order
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  vmodb-stock:
+    build: { context: ./vMODB/marketplace/stock, dockerfile: Dockerfile }
+    container_name: vmodb-stock
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  vmodb-product:
+    build: { context: ./vMODB/marketplace/product, dockerfile: Dockerfile }
+    container_name: vmodb-product
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  vmodb-customer:
+    build: { context: ./vMODB/marketplace/customer, dockerfile: Dockerfile }
+    container_name: vmodb-customer
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  vmodb-payment:
+    build: { context: ./vMODB/marketplace/payment, dockerfile: Dockerfile }
+    container_name: vmodb-payment
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  vmodb-seller:
+    build: { context: ./vMODB/marketplace/seller, dockerfile: Dockerfile }
+    container_name: vmodb-seller
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  vmodb-shipment:
+    build: { context: ./vMODB/marketplace/shipment, dockerfile: Dockerfile }
+    container_name: vmodb-shipment
+    network_mode: "service:vmodb-proxy"
+    volumes: [ "vmodb-shared-space:/tmp" ]
+
+  # 4. Sidecar Emitters (对接统一网桥)
   cart-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
@@ -122,26 +118,7 @@ services:
     environment: [ "VMS_ID=cart", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-cart:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-order:
-    build: { context: ./vMODB/marketplace/order, dockerfile: Dockerfile }
-    container_name: vmodb-order
-    network_mode: "service:vmodb-proxy"
-    ports:
-      - "8081:8081"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 512M
-        reservations:
-          cpus: '0.3'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   order-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -151,24 +128,7 @@ services:
     environment: [ "VMS_ID=order", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-order:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-customer:
-    build: { context: ./vMODB/marketplace/customer, dockerfile: Dockerfile }
-    container_name: vmodb-customer
-    network_mode: "service:vmodb-proxy"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 512M
-        reservations:
-          cpus: '0.2'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   customer-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -178,24 +138,7 @@ services:
     environment: [ "VMS_ID=customer", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-customer:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-payment:
-    build: { context: ./vMODB/marketplace/payment, dockerfile: Dockerfile }
-    container_name: vmodb-payment
-    network_mode: "service:vmodb-proxy"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 512M
-        reservations:
-          cpus: '0.2'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   payment-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -205,24 +148,7 @@ services:
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-payment:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-seller:
-    build: { context: ./vMODB/marketplace/seller, dockerfile: Dockerfile }
-    container_name: vmodb-seller
-    network_mode: "service:vmodb-proxy"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 512M
-        reservations:
-          cpus: '0.2'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   seller-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -232,26 +158,7 @@ services:
     environment: [ "VMS_ID=seller", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-seller:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-product:
-    build: { context: ./vMODB/marketplace/product, dockerfile: Dockerfile }
-    container_name: vmodb-product
-    network_mode: "service:vmodb-proxy"
-    ports:
-      - "8083:8083"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 512M
-        reservations:
-          cpus: '0.3'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   product-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -261,24 +168,7 @@ services:
     environment: [ "VMS_ID=product", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-product:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-shipment:
-    build: { context: ./vMODB/marketplace/shipment, dockerfile: Dockerfile }
-    container_name: vmodb-shipment
-    network_mode: "service:vmodb-proxy"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 512M
-        reservations:
-          cpus: '0.2'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   shipment-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -288,26 +178,7 @@ services:
     environment: [ "VMS_ID=shipment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-shipment:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-
-  vmodb-stock:
-    build: { context: ./vMODB/marketplace/stock, dockerfile: Dockerfile }
-    container_name: vmodb-stock
-    network_mode: "service:vmodb-proxy"
-    ports:
-      - "8082:8082"
-    volumes: [ "vmodb-shared-space:/tmp" ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 512M
-        reservations:
-          cpus: '0.3'
-          memory: 512M
+      kafka: { condition: service_healthy }
 
   stock-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -317,12 +188,9 @@ services:
     environment: [ "VMS_ID=stock", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      vmodb-stock:
-        condition: service_started
-      kafka:
-        condition: service_healthy
+      kafka: { condition: service_healthy }
 
-  #3. ShimLayer
+  # 5. ShimLayer 与 C# Dapr 外部服务
   shim-layer:
     build: ./ShimLayer
     networks:
@@ -332,14 +200,11 @@ services:
     environment:
       - KAFKA_SERVERS=kafka:9092
     depends_on:
-      seller-ms:
-        condition: service_started
-      kafka:
-        condition: service_healthy
+      seller-ms: { condition: service_started }
+      kafka: { condition: service_healthy }
     volumes:
       - ./MarketplaceOnDapr:/MarketplaceOnDapr
 
-  #4. External Microservice：C# + Dapr
   seller-ms:
     build: { context: ./MarketplaceOnDapr, dockerfile: ./SellerMS/Dockerfile }
     networks:
@@ -349,14 +214,6 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5004
       - ASPNETCORE_HTTP_PORTS=5004
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-        reservations:
-          cpus: '1.0'
-          memory: 2G
 
   seller-dapr:
     image: "daprio/daprd:latest"
@@ -365,14 +222,6 @@ services:
     networks:
       - thesis-net
     depends_on: [ seller-ms ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 512M
 
 volumes:
   vmodb-shared-space:
