@@ -26,8 +26,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9092 || exit 1"]
       interval: 3s
-      timeout: 3s
-      retries: 15
+      timeout: 20s
+      retries: 45
     deploy:
       resources:
         limits: { cpus: '1.5', memory: 4G }
