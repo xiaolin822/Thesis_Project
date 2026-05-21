@@ -25,6 +25,11 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9092 || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
     deploy:
       resources:
         limits:
@@ -34,13 +39,13 @@ services:
           cpus: '1.5'
           memory: 4G
 
-
   kafka-init:
     image: confluentinc/cp-kafka:7.6.1
     networks:
       - thesis-net
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     command: >
       bash -c "kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic invoice_issued --partitions 1 --replication-factor 1"
     deploy:
@@ -92,15 +97,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=cart", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-cart ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 512M
-        reservations:
-          cpus: '0.1'
-          memory: 512M
+    depends_on:
+      vmodb-cart:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-order:
     build: { context: ./vMODB/marketplace/order, dockerfile: Dockerfile }
@@ -125,15 +126,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=order", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-order ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 512M
-        reservations:
-          cpus: '0.1'
-          memory: 512M
+    depends_on:
+      vmodb-order:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-customer:
     build: { context: ./vMODB/marketplace/customer, dockerfile: Dockerfile }
@@ -156,15 +153,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=customer", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-customer ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 256M
+    depends_on:
+      vmodb-customer:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-payment:
     build: { context: ./vMODB/marketplace/payment, dockerfile: Dockerfile }
@@ -187,15 +180,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-payment ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 256M
+    depends_on:
+      vmodb-payment:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-seller:
     build: { context: ./vMODB/marketplace/seller, dockerfile: Dockerfile }
@@ -218,15 +207,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=seller", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-seller ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 256M
+    depends_on:
+      vmodb-seller:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-product:
     build: { context: ./vMODB/marketplace/product, dockerfile: Dockerfile }
@@ -251,15 +236,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=product", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-product ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 256M
+    depends_on:
+      vmodb-product:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-shipment:
     build: { context: ./vMODB/marketplace/shipment, dockerfile: Dockerfile }
@@ -282,15 +263,11 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=shipment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-shipment ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 256M
+    depends_on:
+      vmodb-shipment:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   vmodb-stock:
     build: { context: ./vMODB/marketplace/stock, dockerfile: Dockerfile }
@@ -315,35 +292,25 @@ services:
     restart: on-failure
     environment: [ "VMS_ID=stock", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
-    depends_on: [ vmodb-stock ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 256M
+    depends_on:
+      vmodb-stock:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   #3. ShimLayer
   shim-layer:
     build: ./ShimLayer
     networks:
       - thesis-net
-    entrypoint: [ "sh", "-c", "sleep 15 && java -jar app.jar" ]
+    entrypoint: [ "java", "-jar", "app.jar" ]
     environment:
       - KAFKA_SERVERS=kafka:9092
     depends_on:
-      - seller-ms
-      - kafka
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 4G
-        reservations:
-          cpus: '2.0'
-          memory: 4G
+      seller-ms:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   #4. External Microservice：C# + Dapr
   seller-ms:
