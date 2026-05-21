@@ -1,0 +1,26 @@
+﻿version: 1
+apps:
+  - appID: cart
+    appDirPath: CartMS/
+    appProtocol: http
+    appPort: 5001
+    daprHTTPPort: 3501
+    command: ["dotnet","run"]
+  - appID: order
+    appDirPath: OrderMS/
+    appProtocol: http
+    appPort: 5002
+    daprHTTPPort: 3502
+    command: ["dotnet","run"]
+  - appID: stock
+    appDirPath: StockMS/
+    appProtocol: http
+    appPort: 5003
+    daprHTTPPort: 3503
+    command: ["dotnet","run"]
+  - appID: seller
+    appDirPath: SellerMS/
+    appProtocol: http
+    appPort: 5004
+    daprHTTPPort: 3504
+    command: ["dotnet","run"]
