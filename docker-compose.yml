@@ -311,6 +311,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+    volumes:
+      - ./MarketplaceOnDapr:/MarketplaceOnDapr
 
   #4. External Microservice：C# + Dapr
   seller-ms:
