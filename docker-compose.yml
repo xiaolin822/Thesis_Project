@@ -215,6 +215,7 @@ services:
       - ASPNETCORE_URLS=http://+:5004
       - ASPNETCORE_HTTP_PORTS=5004
 
+
   seller-dapr:
     image: "daprio/daprd:latest"
     command: [ "./daprd", "-app-id", "seller", "-app-port", "5004", "-dapr-http-port", "3504", "-resources-path", "/components" ]
