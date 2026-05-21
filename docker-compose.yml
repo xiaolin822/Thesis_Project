@@ -67,6 +67,23 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
       - vmodb-shared-space:/root/vms
+    depends_on:
+      vmodb-cart:
+        condition: service_started
+      vmodb-order:
+        condition: service_started
+      vmodb-product:
+        condition: service_started
+      vmodb-stock:
+        condition: service_started
+      vmodb-shipment:
+        condition: service_started
+      vmodb-customer:
+        condition: service_started
+      vmodb-payment:
+        condition: service_started
+      vmodb-seller:
+        condition: service_started
     deploy:
       resources:
         limits:
