@@ -64,7 +64,9 @@ services:
       - thesis-net
     ports:
       - "8091:8091"
-    volumes: [ "vmodb-shared-space:/tmp"]
+    volumes:
+      - vmodb-shared-space:/tmp
+      - vmodb-shared-space:/root/vms
     deploy:
       resources:
         limits:
@@ -303,6 +305,7 @@ services:
     build: ./ShimLayer
     networks:
       - thesis-net
+    restart: on-failure
     entrypoint: [ "java", "-jar", "app.jar" ]
     environment:
       - KAFKA_SERVERS=kafka:9092
