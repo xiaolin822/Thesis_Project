@@ -50,11 +50,14 @@ services:
     networks:
       - thesis-net
     ports:
-      - "8091:8091"
-      - "8080:8080" # cart
-      - "8081:8081" # order
-      - "8082:8082" # stock
-      - "8083:8083" # product
+      - "8091:8091" # proxy 自身
+      - "8080:8080" # 🌟 cart：完美对齐 8080
+      - "8081:8081" # 🌟 product：完美对齐 8081
+      - "8082:8082" # 🌟 stock：完美对齐 8082
+      - "8083:8083" # 🌟 order：完美对齐 8083
+      - "8084:8084" # 🌟 payment：完美对齐 8084
+      - "8085:8085" # 🌟 shipment：完美对齐 8085
+      - "8087:8087" # 🌟 seller：完美对齐 8087
     restart: on-failure
     volumes:
       - vmodb-shared-space:/tmp
