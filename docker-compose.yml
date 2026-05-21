@@ -101,8 +101,6 @@ services:
   vmodb-cart:
     build: { context: ./vMODB/marketplace/cart, dockerfile: Dockerfile }
     container_name: vmodb-cart
-    networks:
-      - thesis-net
     network_mode: "service:vmodb-proxy"
     ports:
       - "8080:8080"
@@ -133,8 +131,6 @@ services:
     build: { context: ./vMODB/marketplace/order, dockerfile: Dockerfile }
     container_name: vmodb-order
     network_mode: "service:vmodb-proxy"
-    networks:
-      - thesis-net
     ports:
       - "8081:8081"
     volumes: [ "vmodb-shared-space:/tmp" ]
@@ -164,8 +160,6 @@ services:
     build: { context: ./vMODB/marketplace/customer, dockerfile: Dockerfile }
     container_name: vmodb-customer
     network_mode: "service:vmodb-proxy"
-    networks:
-      - thesis-net
     volumes: [ "vmodb-shared-space:/tmp" ]
     deploy:
       resources:
@@ -193,8 +187,6 @@ services:
     build: { context: ./vMODB/marketplace/payment, dockerfile: Dockerfile }
     container_name: vmodb-payment
     network_mode: "service:vmodb-proxy"
-    networks:
-      - thesis-net
     volumes: [ "vmodb-shared-space:/tmp" ]
     deploy:
       resources:
@@ -221,8 +213,6 @@ services:
   vmodb-seller:
     build: { context: ./vMODB/marketplace/seller, dockerfile: Dockerfile }
     container_name: vmodb-seller
-    networks:
-      - thesis-net
     network_mode: "service:vmodb-proxy"
     volumes: [ "vmodb-shared-space:/tmp" ]
     deploy:
@@ -250,8 +240,6 @@ services:
   vmodb-product:
     build: { context: ./vMODB/marketplace/product, dockerfile: Dockerfile }
     container_name: vmodb-product
-    networks:
-      - thesis-net
     network_mode: "service:vmodb-proxy"
     ports:
       - "8083:8083"
@@ -282,8 +270,6 @@ services:
     build: { context: ./vMODB/marketplace/shipment, dockerfile: Dockerfile }
     container_name: vmodb-shipment
     network_mode: "service:vmodb-proxy"
-    networks:
-      - thesis-net
     volumes: [ "vmodb-shared-space:/tmp" ]
     deploy:
       resources:
@@ -311,8 +297,6 @@ services:
     build: { context: ./vMODB/marketplace/stock, dockerfile: Dockerfile }
     container_name: vmodb-stock
     network_mode: "service:vmodb-proxy"
-    networks:
-      - thesis-net
     ports:
       - "8082:8082"
     volumes: [ "vmodb-shared-space:/tmp" ]
