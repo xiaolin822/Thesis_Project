@@ -125,6 +125,9 @@ public final class PaymentService {
     }
 
     private static boolean isCard(String type){
+        if (type == null) {
+            return false;
+        }
         switch (type){
             case "CREDIT_CARD", "DEBIT_CARD" -> {
                 return true;
