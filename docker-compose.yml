@@ -160,7 +160,6 @@ services:
       restart_policy:
         condition: on-failure
         delay: 15s
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
