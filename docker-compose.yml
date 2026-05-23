@@ -117,6 +117,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
@@ -130,6 +131,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
@@ -143,6 +145,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
@@ -160,6 +163,7 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -169,6 +173,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
@@ -182,6 +187,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
@@ -195,6 +201,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
@@ -208,6 +215,7 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
+    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
