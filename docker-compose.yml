@@ -249,7 +249,7 @@ services:
     volumes:
       - ./MarketplaceOnDapr/PublishOutput:/app
     working_dir: /app
-    entrypoint: [ "dotnet", "SellerMS.dll" ]
+    entrypoint: [ "./SellerMS" ]
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:5004
     restart: on-failure
