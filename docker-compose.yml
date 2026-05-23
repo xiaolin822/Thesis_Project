@@ -241,7 +241,7 @@ services:
 
 
   seller-ms:
-    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    image: mcr.microsoft.com/dotnet/aspnet:7.0
     container_name: seller-ms
     networks:
       - thesis-net
