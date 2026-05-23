@@ -117,43 +117,40 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=cart", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   order-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=order", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   customer-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=customer", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   payment-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
@@ -162,68 +159,64 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   seller-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=seller", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   product-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=product", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   shipment-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=shipment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   stock-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    entrypoint: [ "bash", "-c", "sleep 15 && java -jar app.jar" ]
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
+        delay: 15s
     environment: [ "VMS_ID=stock", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
 
   # 5. ShimLayer 与 C# Dapr 外部服务
   shim-layer:
@@ -237,8 +230,8 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 5s
-        max_attempts: 10
+        delay: 8s
+        max_attempts: 30
     depends_on:
       kafka-init: { condition: service_completed_successfully }
       seller-ms: { condition: service_started }
@@ -246,16 +239,21 @@ services:
     volumes:
       - ./MarketplaceOnDapr:/MarketplaceOnDapr
 
+
   seller-ms:
-    build: { context: ./MarketplaceOnDapr, dockerfile: ./SellerMS/Dockerfile }
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    container_name: seller-ms
     networks:
       - thesis-net
     ports:
       - "5004:5004"
+    volumes:
+      - ./MarketplaceOnDapr/PublishOutput:/app
+    working_dir: /app
+    entrypoint: [ "dotnet", "SellerMS.dll" ]
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:5004
     restart: on-failure
-
 
 
   seller-dapr:
