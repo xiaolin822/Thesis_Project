@@ -113,10 +113,11 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes: [ "vmodb-shared-space:/tmp" ]
 
-  # 4. Sidecar Emitters (🌟 绝杀错峰：第一次如果撞击 Kafka 超时摔倒了，Docker 会强制等 15 秒再拉起它们！这时候 Kafka 早就稳定了！)
+  # 4. Sidecar Emitters (🌟 语法严格格式化：5秒延迟重试，原地拉开时序)
   cart-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=cart", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -125,7 +126,8 @@ services:
 
   order-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=order", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -134,7 +136,8 @@ services:
 
   customer-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=customer", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -143,7 +146,8 @@ services:
 
   payment-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -152,7 +156,8 @@ services:
 
   seller-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=seller", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -161,7 +166,8 @@ services:
 
   product-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=product", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -170,7 +176,8 @@ services:
 
   shipment-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=shipment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -179,7 +186,8 @@ services:
 
   stock-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
-    networks: [ - thesis-net ]
+    networks:
+      - thesis-net
     deploy:
       restart_policy: { condition: on-failure, delay: 15s }
     environment: [ "VMS_ID=stock", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
@@ -187,7 +195,6 @@ services:
     depends_on: { kafka-init: { condition: service_completed_successfully } }
 
   # 5. ShimLayer 与 C# Dapr 外部服务
-  # 🌟 终极自愈：由于 C# 编译需要时间，允许 shim-layer 失败复活 50 次，直到全线通电！
   shim-layer:
     build: ./ShimLayer
     networks:
@@ -207,7 +214,6 @@ services:
       - ./MarketplaceOnDapr:/MarketplaceOnDapr
 
   seller-ms:
-    # 🌟 彻底回归原厂代码配置：用它原本封装完整的 Dockerfile 进行原生容器内拉起！
     build: { context: ./MarketplaceOnDapr, dockerfile: ./SellerMS/Dockerfile }
     networks:
       - thesis-net
