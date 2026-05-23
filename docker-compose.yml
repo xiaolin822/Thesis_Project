@@ -17,7 +17,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REREPLICATION_FACTOR: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
@@ -112,12 +112,15 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes: [ "vmodb-shared-space:/tmp" ]
 
-  # 4. Sidecar Emitters (对接统一网桥)
+  # 4. Sidecar Emitters
   cart-emitter:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=cart", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -127,7 +130,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=order", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -137,7 +143,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=customer", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -147,7 +156,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=payment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -157,7 +169,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=seller", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -167,7 +182,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=product", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -177,7 +195,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=shipment", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -187,7 +208,10 @@ services:
     build: { context: ./vMODB/sidecar-emitter, dockerfile: Dockerfile }
     networks:
       - thesis-net
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
     environment: [ "VMS_ID=stock", "VMS_LOG_BASE_DIR=/tmp/", "KAFKA_BOOTSTRAP_SERVERS=kafka:9092" ]
     volumes: [ "vmodb-shared-space:/tmp" ]
     depends_on:
@@ -202,9 +226,16 @@ services:
     entrypoint: [ "java", "-jar", "app.jar" ]
     environment:
       - KAFKA_SERVERS=kafka:9092
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
     depends_on:
-      seller-ms: { condition: service_started }
-      kafka: { condition: service_healthy }
+       kafka-init:
+        condition: service_completed_successfully
+       seller-ms:
+        condition: service_started
     volumes:
       - ./MarketplaceOnDapr:/MarketplaceOnDapr
 
@@ -220,7 +251,7 @@ services:
 
 
   seller-dapr:
-    image: "daprio/daprd:latest"
+    image: "dapr/daprd:latest"
     command: [ "./daprd", "-app-id", "seller", "-app-port", "5004", "-dapr-http-port", "3504", "-resources-path", "/components" ]
     volumes: [ "./MarketplaceOnDapr/DaprConfig:/components" ]
     networks:
