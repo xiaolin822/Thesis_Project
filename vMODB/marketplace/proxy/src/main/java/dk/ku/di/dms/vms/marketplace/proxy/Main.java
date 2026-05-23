@@ -64,11 +64,11 @@ public final class Main {
 //                    .terminal("b", "cart", "a")
                     .internal("b", "stock", RESERVE_STOCK, "a")
                     .internal("c", "order", STOCK_CONFIRMED, "b")
-                    //.internal("d", "payment", INVOICE_ISSUED, "c")
+                    .internal("d", "payment", INVOICE_ISSUED, "c")
                     // treated as internal to minimize number of votes
-                    .terminal("e", "seller", INVOICE_ISSUED, "c");
+                    .internal("e", "seller", INVOICE_ISSUED, "c")
                     //.terminal("any", "customer", "b")
-                    //.terminal("f", "shipment", PAYMENT_CONFIRMED, "d");
+                    .terminal("f", "shipment", PAYMENT_CONFIRMED, "d");
             globalProducerMap.putAll(boot.getInputEventToProducerVMSMap());
             TransactionDAG checkoutDag = boot.build();
             transactionMap.put(checkoutDag.name, checkoutDag);

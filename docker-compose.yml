@@ -232,12 +232,9 @@ services:
         delay: 5s
         max_attempts: 10
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-      seller-ms:
-        condition: service_started
-      seller-dapr:
-        condition: service_healthy
+      kafka-init: { condition: service_completed_successfully }
+      seller-ms: { condition: service_started }
+      seller-dapr: { condition: service_started }
     volumes:
       - ./MarketplaceOnDapr:/MarketplaceOnDapr
 
@@ -259,12 +256,7 @@ services:
     networks:
       - thesis-net
     depends_on: [ seller-ms ]
-    healthcheck:
-      test: [ "CMD", "/daprd", "-v" ]
-      interval: 3s
-      timeout: 15s
-      retries: 40
-      start_period: 60s
+
 
 volumes:
   vmodb-shared-space:
