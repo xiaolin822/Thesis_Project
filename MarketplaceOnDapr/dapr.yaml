@@ -21,6 +21,6 @@ apps:
   - appID: seller
     appDirPath: SellerMS/
     appProtocol: http
-    appPort: 5004
-    daprHTTPPort: 3504
+    appPort: 5006
+    daprHTTPPort: 3506
     command: ["dotnet","run"]
