@@ -11,7 +11,14 @@ services:
     networks:
       - thesis-net
     ports:
+      - "8091:8091"
       - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+      - "8084:8084"
+      - "8085:8085"
+      - "8087:8087"
     volumes:
       - vmodb-shared-space:/tmp
       - vmodb-vms:/root/vms
