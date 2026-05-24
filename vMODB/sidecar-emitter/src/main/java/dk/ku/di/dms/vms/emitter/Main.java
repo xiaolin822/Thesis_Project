@@ -43,14 +43,25 @@ public class Main {
 
         // initialize Kafka Producer
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers",
+                System.getenv().getOrDefault("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
+        );
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("transactional.id", "sidecar-tx-" + vmsId);
-        props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 10000);
+        props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 60000);
+        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+        props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 120000);
         props.put("enable.idempotence", "true");
 
         producer = new KafkaProducer<>(props);
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(() -> {
+                    if (producer != null) {
+                        producer.close();
+                    }
+                })
+        );
         producer.initTransactions();
 
         if (!logBaseDir.endsWith("/")) logBaseDir += "/";
@@ -143,12 +154,14 @@ public class Main {
                         pr.headers().add(new RecordHeader("vms_batch_id", String.valueOf(batchId).getBytes()));
 
                         // producer buffer
-                        producer.send(pr, (metadata, exception) -> {
-                            if (exception != null) {
-                                System.err.println("Send failed for TID " + event.tid());
-                            }
-                        });
+                        //producer.send(pr, (metadata, exception) -> {
+                          //  if (exception != null) {
+                            //    System.err.println("Send failed for TID " + event.tid());
+                            //}
+                        //});
+                        producer.send(pr).get();
                     }
+                    producer.flush();
 
                     producer.commitTransaction();
                     emitBuffer.remove(batchId);
