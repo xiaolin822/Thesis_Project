@@ -7,9 +7,11 @@ using Common.Utils;
 using System.Runtime.InteropServices;
 
 Console.WriteLine("=== SellerMS BOOT ===");
-Console.WriteLine(builder.Configuration.GetDebugView());
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+Console.WriteLine(builder.Configuration.GetDebugView());
 
 builder.Services.AddOptions();
 
