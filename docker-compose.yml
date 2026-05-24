@@ -3,7 +3,21 @@ services:
   # =========================================================
   # Kafka (KRaft Single Node)
   # =========================================================
-
+  vmodb-proxy:
+    image: your-vmodb-proxy:latest
+    container_name: vmodb-proxy
+    networks:
+      - thesis-net
+    ports:
+      - "8080:8080"
+    volumes:
+      - vmodb-shared-space:/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka-broker
@@ -81,95 +95,205 @@ services:
           --partitions 1 \
           --replication-factor 1
 
-  # =========================================================
-  # Seller Microservice (.NET)
-  # =========================================================
-
-  seller-ms:
-    build:
-      context: ./MarketplaceOnDapr/SellerMS
-      dockerfile: Dockerfile
-
-    container_name: seller-ms
-
-    networks:
-      - thesis-net
-
-    ports:
-      - "5004:5004"
-
-    environment:
-      ASPNETCORE_URLS: http://+:5004
-
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -f http://localhost:5004 || exit 1"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-    restart: on-failure
 
   # =========================================================
   # Dapr Sidecar
   # =========================================================
 
-  seller-dapr:
-    image: daprio/daprd:latest
 
-    container_name: seller-dapr
-
-    command:
-      [
-        "./daprd",
-        "-app-id", "seller",
-        "-app-port", "5004",
-        "-dapr-http-port", "3504",
-        "-resources-path", "/components"
-      ]
-
-    volumes:
-      - ./MarketplaceOnDapr/DaprConfig/components:/components
-
-    networks:
-      - thesis-net
-
-    depends_on:
-      seller-ms:
-        condition: service_healthy
-
-    restart: on-failure
 
   # =========================================================
   # Example Emitter
   # =========================================================
 
+  cart-emitter:
+    build:
+      context: ./vMODB/sidecar-emitter
+    container_name: cart-emitter
+    networks:
+      - thesis-net
+    environment:
+      VMS_ID: cart
+      VMS_LOG_BASE_DIR: /tmp/
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    restart: on-failure:5
+
+  order-emitter:
+    build:
+      context: ./vMODB/sidecar-emitter
+    container_name: order-emitter
+    networks:
+      - thesis-net
+    environment:
+      VMS_ID: order
+      VMS_LOG_BASE_DIR: /tmp/
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    restart: on-failure:5
+
+  stock-emitter:
+    build:
+      context: ./vMODB/sidecar-emitter
+    container_name: stock-emitter
+    networks:
+      - thesis-net
+    environment:
+      VMS_ID: stock
+      VMS_LOG_BASE_DIR: /tmp/
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    restart: on-failure:5
+
+  product-emitter:
+    build:
+      context: ./vMODB/sidecar-emitter
+    container_name: product-emitter
+    networks:
+      - thesis-net
+    environment:
+      VMS_ID: product
+      VMS_LOG_BASE_DIR: /tmp/
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    restart: on-failure:5
+
   seller-emitter:
     build:
       context: ./vMODB/sidecar-emitter
-      dockerfile: Dockerfile
-
     container_name: seller-emitter
-
     networks:
       - thesis-net
-
     environment:
       VMS_ID: seller
       VMS_LOG_BASE_DIR: /tmp/
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-
     volumes:
       - vmodb-shared-space:/tmp
-
     depends_on:
       kafka-init:
         condition: service_completed_successfully
+    restart: on-failure:5
 
-    restart: on-failure
+  shipment-emitter:
+    build:
+      context: ./vMODB/sidecar-emitter
+    container_name: shipment-emitter
+    networks:
+      - thesis-net
+    environment:
+      VMS_ID: shipment
+      VMS_LOG_BASE_DIR: /tmp/
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    restart: on-failure:5
+  vmodb-cart:
+    build:
+      context: ./vMODB/marketplace/cart
+    container_name: vmodb-cart
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-order:
+    build:
+      context: ./vMODB/marketplace/order
+    container_name: vmodb-order
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-stock:
+    build:
+      context: ./vMODB/marketplace/stock
+    container_name: vmodb-stock
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-product:
+    build:
+      context: ./vMODB/marketplace/product
+    container_name: vmodb-product
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-customer:
+    build:
+      context: ./vMODB/marketplace/customer
+    container_name: vmodb-customer
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-payment:
+    build:
+      context: ./vMODB/marketplace/payment
+    container_name: vmodb-payment
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-seller:
+    build:
+      context: ./vMODB/marketplace/seller
+    container_name: vmodb-seller
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
+
+  vmodb-shipment:
+    build:
+      context: ./vMODB/marketplace/shipment
+    container_name: vmodb-shipment
+    network_mode: "service:vmodb-proxy"
+    volumes:
+      - vmodb-shared-space:/tmp
+    depends_on:
+      vmodb-proxy:
+        condition: service_healthy
 
 # =========================================================
 # Volumes
@@ -177,6 +301,7 @@ services:
 
 volumes:
   vmodb-shared-space:
+
 
 # =========================================================
 # Networks
