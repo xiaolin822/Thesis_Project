@@ -6,6 +6,9 @@ using MysticMind.PostgresEmbed;
 using Common.Utils;
 using System.Runtime.InteropServices;
 
+Console.WriteLine("=== SellerMS BOOT ===");
+Console.WriteLine(builder.Configuration.GetDebugView());
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOptions();
@@ -13,6 +16,9 @@ builder.Services.AddOptions();
 IConfigurationSection configSection = builder.Configuration.GetSection("SellerConfig");
 builder.Services.Configure<SellerConfig>(configSection);
 var config = configSection.Get<SellerConfig>();
+Console.WriteLine($"InMemoryDb = {config.InMemoryDb}");
+Console.WriteLine($"PostgresEmbed = {config.PostgresEmbed}");
+Console.WriteLine($"Logging = {config.Logging}");
 if (config == null)
     Environment.Exit(1);
 
