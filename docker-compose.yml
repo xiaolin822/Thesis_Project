@@ -14,6 +14,7 @@ services:
       - "8080:8080"
     volumes:
       - vmodb-shared-space:/tmp
+      - vmodb-vms:/root/vms
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka-broker
@@ -276,6 +277,7 @@ services:
 
 volumes:
   vmodb-shared-space:
+  vmodb-vms:
 
 
 # =========================================================
@@ -284,4 +286,5 @@ volumes:
 
 networks:
   thesis-net:
+    name: thesis-net
     driver: bridge
