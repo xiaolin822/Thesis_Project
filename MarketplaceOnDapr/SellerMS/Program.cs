@@ -6,13 +6,12 @@ using MysticMind.PostgresEmbed;
 using Common.Utils;
 using System.Runtime.InteropServices;
 
-
 var builder = WebApplication.CreateBuilder(args);
-
-Console.WriteLine(builder.Configuration.GetDebugView());
 
 builder.Services.AddOptions();
 
+IConfigurationSection configSection = builder.Configuration.GetSection("SellerConfig");
+builder.Services.Configure<SellerConfig>(configSection);
 var config = configSection.Get<SellerConfig>();
 if (config == null)
     Environment.Exit(1);
@@ -36,9 +35,9 @@ if (config.PostgresEmbed)
         serverParams.Add( "unix_socket_group", "" );
         serverParams.Add( "unix_socket_permissions", "0777");
     }
-    
+
     server = new PgServer("15.3.0", port: 5436, pgServerParams: serverParams, instanceId: instanceId);
-    _ = server.StartAsync();
+    waitPgSql = server.StartAsync();
 }
 
 if(config.InMemoryDb){
@@ -73,10 +72,9 @@ using (var scope = app.Services.CreateScope())
 
     if (config.PostgresEmbed)
     {
-        Console.WriteLine("Postgres embed starting in background...");
-        //if (waitPgSql is not null) await waitPgSql;
-        //else
-            //throw new Exception("PostgreSQL was not setup correctly!");
+        if (waitPgSql is not null) await waitPgSql;
+        else
+            throw new Exception("PostgreSQL was not setup correctly!");
     }
 
     if(!config.InMemoryDb){
