@@ -37,7 +37,7 @@ if (config.PostgresEmbed)
     }
     
     server = new PgServer("15.3.0", port: 5436, pgServerParams: serverParams, instanceId: instanceId);
-    waitPgSql = server.StartAsync();
+    _ = server.StartAsync();
 }
 
 if(config.InMemoryDb){
@@ -72,9 +72,10 @@ using (var scope = app.Services.CreateScope())
 
     if (config.PostgresEmbed)
     {
-        if (waitPgSql is not null) await waitPgSql;
-        else
-            throw new Exception("PostgreSQL was not setup correctly!");
+        Console.WriteLine("Postgres embed starting in background...");
+        //if (waitPgSql is not null) await waitPgSql;
+        //else
+            //throw new Exception("PostgreSQL was not setup correctly!");
     }
 
     if(!config.InMemoryDb){
