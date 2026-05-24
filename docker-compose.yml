@@ -175,6 +175,9 @@ services:
   vmodb-cart:
     build: ./vMODB/marketplace/cart
     container_name: vmodb-cart
+    environment:
+      - VMS_ID=cart
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -182,6 +185,9 @@ services:
   vmodb-order:
     build: ./vMODB/marketplace/order
     container_name: vmodb-order
+    environment:
+      - VMS_ID=order
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -189,6 +195,9 @@ services:
   vmodb-stock:
     build: ./vMODB/marketplace/stock
     container_name: vmodb-stock
+    environment:
+      - VMS_ID=stock
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -196,6 +205,9 @@ services:
   vmodb-product:
     build: ./vMODB/marketplace/product
     container_name: vmodb-product
+    environment:
+      - VMS_ID=product
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -203,6 +215,9 @@ services:
   vmodb-customer:
     build: ./vMODB/marketplace/customer
     container_name: vmodb-customer
+    environment:
+      - VMS_ID=customer
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -210,6 +225,9 @@ services:
   vmodb-payment:
     build: ./vMODB/marketplace/payment
     container_name: vmodb-payment
+    environment:
+      - VMS_ID=payment
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -217,6 +235,9 @@ services:
   vmodb-seller:
     build: ./vMODB/marketplace/seller
     container_name: vmodb-seller
+    environment:
+      - VMS_ID=seller
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
@@ -224,6 +245,9 @@ services:
   vmodb-shipment:
     build: ./vMODB/marketplace/shipment
     container_name: vmodb-shipment
+    environment:
+      - VMS_ID=shipment
+      - VMS_LOG_BASE_DIR=/tmp
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp

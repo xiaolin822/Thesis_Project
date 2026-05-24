@@ -12,7 +12,7 @@ PRODUCT_HOT_POOL_SIZE=3
 # Step 1
 echo "Pre-warming shared stock..."
 for p_id in $(seq 1 $PRODUCT_HOT_POOL_SIZE); do
-  curl -s -X POST -H "Content-Type: application/json" -d '{"seller_id": "1", "product_id": "'$p_id'", "qty_available" : 1000000, "qty_reserved" : 0, "order_count" : 0, "ytd": 0, "data" : "test", "version": "0"}' "http://$TARGET_HOST:$STOCK_PORT/stock" > /dev/null
+  curl -s -X POST -H "Content-Type: application/json" -d '{"seller_id": "2", "product_id": "'$p_id'", "qty_available" : 1000000, "qty_reserved" : 0, "order_count" : 0, "ytd": 0, "data" : "test", "version": "0"}' "http://$TARGET_HOST:$STOCK_PORT/stock" > /dev/null
 done
 
 INIT_SUCCESS=$(curl -s "http://$TARGET_HOST:$SELLER_MS_PORT/telemetry/metrics" | grep -o '"success_count":[0-9]*' | cut -d: -f2)
@@ -25,7 +25,7 @@ for i in $(seq 1 $TOTAL_CONCURRENT_USERS)
 do
   (
     PRODUCT_ID=$(( (i % PRODUCT_HOT_POOL_SIZE) + 1 ))
-    curl -s -X PATCH -H "Content-Type: application/json" -d '{"SellerId": "1", "ProductId": "'$PRODUCT_ID'", "ProductName" : "hot", "UnitPrice" : "10", "FreightValue" : "0", "Quantity": "1", "Voucher" : "0", "Version": "0"}' "http://$TARGET_HOST:$CART_PORT/cart/$i/add" > /dev/null
+    curl -s -X PATCH -H "Content-Type: application/json" -d '{"SellerId": "2", "ProductId": "'$PRODUCT_ID'", "ProductName" : "hot", "UnitPrice" : "10", "FreightValue" : "0", "Quantity": "1", "Voucher" : "0", "Version": "0"}' "http://$TARGET_HOST:$CART_PORT/cart/$i/add" > /dev/null
     curl -s -X POST -H "Content-Type: application/json" -d '{ "CustomerId" : '$i', "instanceId" : "'$i'" }' "http://$TARGET_HOST:$PROXY_PORT/cart" > /dev/null
   ) &
 done

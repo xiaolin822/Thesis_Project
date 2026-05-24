@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <!-- VMS ID from env -->
+    <property name="VMS_ID" value="${VMS_ID:-unknown}" />
+    <property name="LOG_DIR" value="/tmp" />
+
+    <!-- AUDIT LOG FILE -->
     <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/tmp/vms_audit.log</file>
+
+        <file>${LOG_DIR}/${VMS_ID}_log.txt</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/tmp/archived/vms_audit-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+            <!-- archived logs -->
+            <fileNamePattern>${LOG_DIR}/archived/${VMS_ID}_log-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
+
         </rollingPolicy>
 
         <encoder>
             <pattern>%msg%n</pattern>
         </encoder>
+
     </appender>
 
     <logger name="VmsAuditLogger" level="INFO" additivity="false">
-        <appender-ref ref="AUDIT_FILE" />
+        <appender-ref ref="AUDIT_FILE"/>
     </logger>
 
     <root level="INFO">
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="AUDIT_FILE"/>
     </root>
 
 </configuration>
