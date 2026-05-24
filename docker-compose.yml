@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   # =========================================================
@@ -71,15 +69,17 @@ services:
       kafka:
         condition: service_healthy
 
-    command: >
-      bash -c "
-      kafka-topics \
-        --bootstrap-server kafka:9092 \
-        --create \
-        --if-not-exists \
-        --topic invoice_issued \
-        --partitions 1 \
-        --replication-factor 1
+    command:
+      - bash
+      - -c
+      - |
+        kafka-topics \
+          --bootstrap-server kafka:9092 \
+          --create \
+          --if-not-exists \
+          --topic invoice_issued \
+          --partitions 1 \
+          --replication-factor 1
 
   # =========================================================
   # Seller Microservice (.NET)
