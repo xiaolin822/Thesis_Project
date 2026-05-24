@@ -8,17 +8,15 @@
     <!-- AUDIT LOG FILE -->
     <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 
-        <file>${LOG_DIR}/${VMS_ID}_log.txt</file>
+        <file>/tmp/${VMS_ID}_log.txt</file>
+
+        <immediateFlush>true</immediateFlush>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-
-            <!-- archived logs -->
-            <fileNamePattern>${LOG_DIR}/archived/${VMS_ID}_log-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-
+            <fileNamePattern>/tmp/archived/%d{yyyy-MM-dd}/${VMS_ID}_log-%i.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
-
         </rollingPolicy>
 
         <encoder>

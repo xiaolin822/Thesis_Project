@@ -92,7 +92,7 @@ services:
     networks: [thesis-net]
     environment:
       VMS_ID: cart
-      VMS_LOG_BASE_DIR: /tmp/
+      VMS_LOG_BASE_DIR: /tmp
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - vmodb-shared-space:/tmp
@@ -107,7 +107,7 @@ services:
     networks: [thesis-net]
     environment:
       VMS_ID: order
-      VMS_LOG_BASE_DIR: /tmp/
+      VMS_LOG_BASE_DIR: /tmp
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - vmodb-shared-space:/tmp
@@ -122,7 +122,7 @@ services:
     networks: [thesis-net]
     environment:
       VMS_ID: stock
-      VMS_LOG_BASE_DIR: /tmp/
+      VMS_LOG_BASE_DIR: /tmp
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - vmodb-shared-space:/tmp
@@ -137,7 +137,7 @@ services:
     networks: [thesis-net]
     environment:
       VMS_ID: product
-      VMS_LOG_BASE_DIR: /tmp/
+      VMS_LOG_BASE_DIR: /tmp
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - vmodb-shared-space:/tmp
@@ -152,7 +152,7 @@ services:
     networks: [thesis-net]
     environment:
       VMS_ID: seller
-      VMS_LOG_BASE_DIR: /tmp/
+      VMS_LOG_BASE_DIR: /tmp
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - vmodb-shared-space:/tmp
@@ -167,7 +167,7 @@ services:
     networks: [thesis-net]
     environment:
       VMS_ID: shipment
-      VMS_LOG_BASE_DIR: /tmp/
+      VMS_LOG_BASE_DIR: /tmp
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - vmodb-shared-space:/tmp
