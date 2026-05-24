@@ -384,8 +384,9 @@ public final class VmsEventHandler extends ModbHttpServer {
         }
     }
 
-    private static final Logger AUDIT_LOGGER = LoggerFactory.getLogger("VmsAuditLogger");
+    //private static final Logger AUDIT_LOGGER = LoggerFactory.getLogger("VmsAuditLogger");
 
+    private final Object logLock = new Object();
     private void writeRawAuditLog(long batch, long tid, String msgType, boolean emit,
                                   String inputMsg, String topic, String rs, String ws, String payload) {
         try {
@@ -403,7 +404,12 @@ public final class VmsEventHandler extends ModbHttpServer {
                     payload
             );
 
-            AUDIT_LOGGER.info(logLine);
+            synchronized (logLock) {
+                try (java.io.FileWriter fw = new java.io.FileWriter(this.ExternalLogPath, true);
+                     java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+                    bw.write(logLine);
+                }
+            }
         } catch (Exception e) {
             LOGGER.log(ERROR, "Failed to write audit log [" + msgType + "]: " + e.getMessage());
         }
