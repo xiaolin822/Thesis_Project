@@ -1,7 +1,7 @@
 services:
 
   # =========================================================
-  # Kafka (KRaft Single Node)
+  # Proxy
   # =========================================================
   vmodb-proxy:
     build:
@@ -15,100 +15,74 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
       - vmodb-vms:/root/vms
+
+  # =========================================================
+  # Kafka (FIXED KRaft SINGLE NODE)
+  # =========================================================
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka-broker
-
     networks:
       - thesis-net
-
     ports:
       - "9092:9092"
 
     environment:
       KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
 
-      KAFKA_PROCESS_ROLES: 'broker,controller'
+      # ✅ ONLY INTERNAL (NO EXTERNAL)
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
 
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
-
-      KAFKA_LISTENERS: 'INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093'
-
-      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:9092,EXTERNAL://localhost:29092'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
-
-
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
-
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-
-      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "kafka-topics --bootstrap-server localhost:9092 --list > /dev/null 2>&1"
-        ]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:9092"]
       interval: 10s
       timeout: 10s
-      retries: 10
+      retries: 15
 
     restart: unless-stopped
 
   # =========================================================
-  # Kafka Topic Init
+  # Topic init
   # =========================================================
-
   kafka-init:
     image: confluentinc/cp-kafka:7.6.1
-
     networks:
       - thesis-net
-
     depends_on:
       kafka:
         condition: service_healthy
-
     command:
       - bash
       - -c
       - |
-        kafka-topics \
-          --bootstrap-server kafka:9092 \
-          --create \
-          --if-not-exists \
+        kafka-topics --bootstrap-server kafka:9092 \
+          --create --if-not-exists \
           --topic invoice_issued \
           --partitions 1 \
           --replication-factor 1
 
-
   # =========================================================
-  # Dapr Sidecar
-  # =========================================================
-
-
-
-  # =========================================================
-  # Example Emitter
+  # EMITTERS (FIXED)
   # =========================================================
 
   cart-emitter:
-    build:
-      context: ./vMODB/sidecar-emitter
+    build: ./vMODB/sidecar-emitter
     container_name: cart-emitter
-    networks:
-      - thesis-net
+    networks: [thesis-net]
     environment:
       VMS_ID: cart
       VMS_LOG_BASE_DIR: /tmp/
@@ -116,16 +90,14 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    restart: on-failure:5
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
 
   order-emitter:
-    build:
-      context: ./vMODB/sidecar-emitter
+    build: ./vMODB/sidecar-emitter
     container_name: order-emitter
-    networks:
-      - thesis-net
+    networks: [thesis-net]
     environment:
       VMS_ID: order
       VMS_LOG_BASE_DIR: /tmp/
@@ -133,16 +105,14 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    restart: on-failure:5
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
 
   stock-emitter:
-    build:
-      context: ./vMODB/sidecar-emitter
+    build: ./vMODB/sidecar-emitter
     container_name: stock-emitter
-    networks:
-      - thesis-net
+    networks: [thesis-net]
     environment:
       VMS_ID: stock
       VMS_LOG_BASE_DIR: /tmp/
@@ -150,16 +120,14 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    restart: on-failure:5
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
 
   product-emitter:
-    build:
-      context: ./vMODB/sidecar-emitter
+    build: ./vMODB/sidecar-emitter
     container_name: product-emitter
-    networks:
-      - thesis-net
+    networks: [thesis-net]
     environment:
       VMS_ID: product
       VMS_LOG_BASE_DIR: /tmp/
@@ -167,16 +135,14 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    restart: on-failure:5
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
 
   seller-emitter:
-    build:
-      context: ./vMODB/sidecar-emitter
+    build: ./vMODB/sidecar-emitter
     container_name: seller-emitter
-    networks:
-      - thesis-net
+    networks: [thesis-net]
     environment:
       VMS_ID: seller
       VMS_LOG_BASE_DIR: /tmp/
@@ -184,16 +150,14 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    restart: on-failure:5
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
 
   shipment-emitter:
-    build:
-      context: ./vMODB/sidecar-emitter
+    build: ./vMODB/sidecar-emitter
     container_name: shipment-emitter
-    networks:
-      - thesis-net
+    networks: [thesis-net]
     environment:
       VMS_ID: shipment
       VMS_LOG_BASE_DIR: /tmp/
@@ -201,88 +165,72 @@ services:
     volumes:
       - vmodb-shared-space:/tmp
     depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    restart: on-failure:5
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # =========================================================
+  # MARKETPLACE (unchanged structure)
+  # =========================================================
   vmodb-cart:
-    build:
-      context: ./vMODB/marketplace/cart
+    build: ./vMODB/marketplace/cart
     container_name: vmodb-cart
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
 
   vmodb-order:
-    build:
-      context: ./vMODB/marketplace/order
+    build: ./vMODB/marketplace/order
     container_name: vmodb-order
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
 
-
   vmodb-stock:
-    build:
-      context: ./vMODB/marketplace/stock
+    build: ./vMODB/marketplace/stock
     container_name: vmodb-stock
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
 
   vmodb-product:
-    build:
-      context: ./vMODB/marketplace/product
+    build: ./vMODB/marketplace/product
     container_name: vmodb-product
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
 
   vmodb-customer:
-    build:
-      context: ./vMODB/marketplace/customer
+    build: ./vMODB/marketplace/customer
     container_name: vmodb-customer
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
-
 
   vmodb-payment:
-    build:
-      context: ./vMODB/marketplace/payment
+    build: ./vMODB/marketplace/payment
     container_name: vmodb-payment
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
 
-
   vmodb-seller:
-    build:
-      context: ./vMODB/marketplace/seller
+    build: ./vMODB/marketplace/seller
     container_name: vmodb-seller
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
 
   vmodb-shipment:
-    build:
-      context: ./vMODB/marketplace/shipment
+    build: ./vMODB/marketplace/shipment
     container_name: vmodb-shipment
-    network_mode: "service:vmodb-proxy"
+    network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
-
-# =========================================================
-# Volumes
-# =========================================================
 
 volumes:
   vmodb-shared-space:
   vmodb-vms:
-
-
-# =========================================================
-# Networks
-# =========================================================
 
 networks:
   thesis-net:
