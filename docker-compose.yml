@@ -14,12 +14,6 @@ services:
       - "8080:8080"
     volumes:
       - vmodb-shared-space:/tmp
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    restart: unless-stopped
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka-broker
@@ -216,9 +210,6 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
 
   vmodb-order:
     build:
@@ -227,9 +218,7 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
+
 
   vmodb-stock:
     build:
@@ -238,9 +227,6 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
 
   vmodb-product:
     build:
@@ -249,9 +235,6 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
 
   vmodb-customer:
     build:
@@ -260,9 +243,7 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
+
 
   vmodb-payment:
     build:
@@ -271,9 +252,7 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
+
 
   vmodb-seller:
     build:
@@ -282,9 +261,6 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
 
   vmodb-shipment:
     build:
@@ -293,9 +269,6 @@ services:
     network_mode: "service:vmodb-proxy"
     volumes:
       - vmodb-shared-space:/tmp
-    depends_on:
-      vmodb-proxy:
-        condition: service_healthy
 
 # =========================================================
 # Volumes
