@@ -13,7 +13,6 @@ Console.WriteLine(builder.Configuration.GetDebugView());
 
 builder.Services.AddOptions();
 
-builder.Services.Configure<SellerConfig>(configSection);
 var config = configSection.Get<SellerConfig>();
 if (config == null)
     Environment.Exit(1);
