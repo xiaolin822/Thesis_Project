@@ -5,7 +5,7 @@ services:
   # =========================================================
   vmodb-proxy:
     build:
-      context: ./vMODB/proxy
+      context: ./vMODB/marketplace/proxy
       dockerfile: Dockerfile
     container_name: vmodb-proxy
     networks:
