@@ -258,6 +258,66 @@ services:
     network_mode: service:vmodb-proxy
     volumes:
       - vmodb-shared-space:/tmp
+  seller-ms:
+    build:
+      context: ./MarketplaceOnDapr
+      dockerfile: ./SellerMS/Dockerfile
+    container_name: seller-ms
+    networks:
+      - thesis-net
+    ports:
+      - "5006:5006"
+    environment:
+      - ASPNETCORE_URLS=http://+:5006
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+
+
+  seller-dapr:
+    image: "daprio/daprd:1.11.2"
+    container_name: seller-dapr
+    command: [
+      "./daprd",
+      "-app-id", "seller",
+      "-app-port", "5006",
+      "-dapr-http-port", "3506",
+      "-app-protocol", "http",
+      "-app-channel-address", "seller-ms",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - ./MarketplaceOnDapr/DaprConfig:/components
+    networks:
+      - thesis-net
+    ports:
+      - "3506:3506"
+    depends_on:
+      - seller-ms
+    restart: unless-stopped
+
+  # ShimLayer
+  shim-layer:
+    build:
+      context: ./ShimLayer
+      dockerfile: Dockerfile
+    # image: openjdk:17-slim
+    # working_dir: /app
+    # entrypoint: ["java", "-jar", "ShimLayer-1.0-SNAPSHOT.jar"]
+    container_name: shim-layer
+    networks:
+      - thesis-net
+    environment:
+      - KAFKA_SERVERS=kafka:9092
+      - DAPR_HTTP_URL=http://seller-dapr:3506
+    volumes:
+      - ./ShimLayer/target:/app
+      - ./MarketplaceOnDapr:/MarketplaceOnDapr
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      seller-dapr:
+        condition: service_started
+    restart: unless-stopped
 
 volumes:
   vmodb-shared-space:
