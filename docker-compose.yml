@@ -4,7 +4,9 @@ services:
   # Kafka (KRaft Single Node)
   # =========================================================
   vmodb-proxy:
-    image: your-vmodb-proxy:latest
+    build:
+      context: ./vMODB/proxy
+      dockerfile: Dockerfile
     container_name: vmodb-proxy
     networks:
       - thesis-net
