@@ -63,7 +63,7 @@ public class RouteTable {
     public String getDaprInvocationUrl(String topic) {
         String appId = topicToAppId.get(topic);
         if (appId == null) return null;
-        return String.format("http://seller-dapr:3506/v1.0/invoke/seller-ms/method/ProcessX",
+        return String.format("http://seller-dapr:3506/v1.0/invoke/seller/method/ProcessX",
                 daprPorts.get(appId), appId, topic);
     }
 
