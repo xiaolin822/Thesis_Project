@@ -13,8 +13,10 @@ import java.util.function.Consumer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import java.time.Instant;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.ku.di.dms.shim.model.events.InvoiceIssued;
@@ -57,17 +59,39 @@ public class DaprHttpClient {
 
             JsonNode root = mapper.readTree(event.payload());
 
-            if (root.has("issueDate")) {
-                long millis = root.get("issueDate").asLong();
+            ObjectNode obj = (ObjectNode) root;
 
-                ((ObjectNode) root).put(
+            if (obj.has("issueDate")) {
+                long millis = obj.get("issueDate").asLong();
+
+                obj.put(
                         "issueDate",
                         Instant.ofEpochMilli(millis).toString()
                 );
             }
+            obj.put("invoiceIssued", true);
 
-            String fixedJson = mapper.writeValueAsString(root);
+            if (obj.has("items")) {
 
+                ArrayNode items = (ArrayNode) obj.get("items");
+
+                for (JsonNode item : items) {
+
+                    ObjectNode itemObj = (ObjectNode) item;
+
+                    if (itemObj.has("shipping_limit_date")) {
+
+                        long millis = itemObj.get("shipping_limit_date").asLong();
+
+                        itemObj.put(
+                                "shipping_limit_date",
+                                Instant.ofEpochMilli(millis).toString()
+                        );
+                    }
+                }
+            }
+
+            String fixedJson = mapper.writeValueAsString(obj);
             System.out.println(fixedJson);
 
             HttpRequest request = HttpRequest.newBuilder()
