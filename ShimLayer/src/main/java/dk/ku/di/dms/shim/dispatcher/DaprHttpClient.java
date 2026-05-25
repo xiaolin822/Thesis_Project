@@ -45,6 +45,12 @@ public class DaprHttpClient {
             .connectTimeout(Duration.ofSeconds(5))
             .executor(daprExecutor)
             .build();
+    private void putIfNull(ObjectNode node, String field, String value) {
+
+        if (!node.has(field) || node.get(field).isNull()) {
+            node.put(field, value);
+        }
+    }
 
     /**
      * Asynchronously dispatches events to the target Dapr endpoint
@@ -60,6 +66,26 @@ public class DaprHttpClient {
             JsonNode root = mapper.readTree(event.payload());
 
             ObjectNode obj = (ObjectNode) root;
+
+            if (obj.has("customer")) {
+
+                ObjectNode customer = (ObjectNode) obj.get("customer");
+
+                putIfNull(customer, "FirstName", "John");
+                putIfNull(customer, "LastName", "Doe");
+                putIfNull(customer, "Street", "Test Street");
+                putIfNull(customer, "Complement", "Apt 1");
+                putIfNull(customer, "City", "Copenhagen");
+                putIfNull(customer, "State", "Hovedstaden");
+                putIfNull(customer, "ZipCode", "2100");
+
+                putIfNull(customer, "PaymentType", "CARD");
+                putIfNull(customer, "CardNumber", "1234567812345678");
+                putIfNull(customer, "CardHolderName", "John Doe");
+                putIfNull(customer, "CardExpiration", "12/30");
+                putIfNull(customer, "CardSecurityNumber", "123");
+                putIfNull(customer, "CardBrand", "VISA");
+            }
 
             if (obj.has("issueDate")) {
                 long millis = obj.get("issueDate").asLong();
