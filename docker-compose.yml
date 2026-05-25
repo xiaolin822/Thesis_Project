@@ -310,7 +310,6 @@ services:
       - KAFKA_SERVERS=kafka:9092
       - DAPR_HTTP_URL=http://seller-dapr:3506
     volumes:
-      - ./ShimLayer/target:/app
       - ./MarketplaceOnDapr:/MarketplaceOnDapr
     depends_on:
       kafka-init:
