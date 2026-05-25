@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.11.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+    <!--<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" /> -->
     <!--<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" /> -->
     <PackageReference Include="Laraue.EfCoreTriggers.PostgreSql" Version="7.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
