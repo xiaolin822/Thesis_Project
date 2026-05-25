@@ -30,7 +30,7 @@ public class EventController : ControllerBase
     }
 
     [HttpPost("ProcessNewInvoice")]
-    [Topic(PUBSUB_NAME, nameof(InvoiceIssued))]
+    [Topic(PUBSUB_NAME, "invoice_issued")]
     public ActionResult ProcessNewInvoice([FromBody] InvoiceIssued invoiceIssued)
     {
         try{
