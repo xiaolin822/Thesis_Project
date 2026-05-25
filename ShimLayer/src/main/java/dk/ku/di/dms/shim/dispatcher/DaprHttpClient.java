@@ -118,7 +118,7 @@ public class DaprHttpClient {
             }
 
             String fixedJson = mapper.writeValueAsString(obj);
-            System.out.println(fixedJson);
+
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
