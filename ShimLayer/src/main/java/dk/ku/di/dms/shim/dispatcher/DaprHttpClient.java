@@ -10,6 +10,14 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.Instant;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.ku.di.dms.shim.model.events.InvoiceIssued;
 
 public class DaprHttpClient {
 
@@ -43,29 +51,47 @@ public class DaprHttpClient {
      * @param onSuccess Callback triggered upon receiving a successful 20x response
      */
     public void post(String url, CausalEvent event, Consumer<EventID> onSuccess) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(event.payload()))
-                .build();
-        System.out.println(event.payload());
 
-        // Both async invocation and its subsequent pipeline execution run within the daprExecutor context
-        httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenAccept(response -> {
-                    if (response.statusCode() == 200 || response.statusCode() == 204) {
-                        onSuccess.accept(event.id());
-                    } else {
-                        System.err.println("[Dapr] Dispatch failed! ID: " + event.id() +
-                                " Status: " + response.statusCode() +
-                                " Body: " + response.body());
-                    }
-                })
-                .exceptionally(ex -> {
-                    System.err.println("[Dapr] Network anomaly! ID: " + event.id() + " Error: " + ex.getMessage());
-                    return null;
-                });
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            JsonNode root = mapper.readTree(event.payload());
+
+            if (root.has("issueDate")) {
+                long millis = root.get("issueDate").asLong();
+
+                ((ObjectNode) root).put(
+                        "issueDate",
+                        Instant.ofEpochMilli(millis).toString()
+                );
+            }
+
+            String fixedJson = mapper.writeValueAsString(root);
+
+            System.out.println(fixedJson);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(fixedJson))
+                    .build();
+
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 204) {
+                            onSuccess.accept(event.id());
+                        } else {
+                            System.err.println("[Dapr] Dispatch failed! ID: " + event.id() +
+                                    " Status: " + response.statusCode() +
+                                    " Body: " + response.body());
+                        }
+                    });
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
 
     /**
      * terminates the bounded executor during shutdown phases
