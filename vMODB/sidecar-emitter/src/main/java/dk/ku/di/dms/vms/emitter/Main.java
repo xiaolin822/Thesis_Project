@@ -154,12 +154,11 @@ public class Main {
                         pr.headers().add(new RecordHeader("vms_batch_id", String.valueOf(batchId).getBytes()));
 
                         // producer buffer
-                        //producer.send(pr, (metadata, exception) -> {
-                          //  if (exception != null) {
-                            //    System.err.println("Send failed for TID " + event.tid());
-                            //}
-                        //});
-                        producer.send(pr).get();
+                        producer.send(pr, (metadata, exception) -> {
+                            if (exception != null) {
+                                System.err.println("Send failed: " + exception.getMessage());
+                            }
+                        });
                     }
                     producer.flush();
 
