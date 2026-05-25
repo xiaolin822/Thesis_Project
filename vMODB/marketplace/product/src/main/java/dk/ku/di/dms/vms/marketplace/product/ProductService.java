@@ -26,7 +26,6 @@ public final class ProductService {
 
     @Inbound(values = {UPDATE_PRODUCT})
     @Outbound(PRODUCT_UPDATED)
-    @ExternalMsg("product.updated")
     @Transactional(type=RW)
     @PartitionBy(clazz = UpdateProduct.class, method = "getId")
     public ProductUpdated updateProduct(UpdateProduct updateProduct) {
@@ -52,7 +51,6 @@ public final class ProductService {
 
     @Inbound(values = {UPDATE_PRICE})
     @Outbound(PRICE_UPDATED)
-    @ExternalMsg("price.updated")
     @Transactional(type=RW)
     @PartitionBy(clazz = PriceUpdate.class, method = "getId")
     public PriceUpdated updateProductPrice(PriceUpdate priceUpdate) {

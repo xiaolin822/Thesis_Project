@@ -61,7 +61,6 @@ public final class PaymentService {
 
     @Inbound(values = {INVOICE_ISSUED})
     @Outbound(PAYMENT_CONFIRMED)
-    @ExternalMsg(PAYMENT_CONFIRMED)
     @Transactional(type=W)
     @Parallel
     public PaymentConfirmed processPayment(InvoiceIssued invoiceIssued) {
