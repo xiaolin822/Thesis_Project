@@ -130,7 +130,7 @@ public class Main {
                     }
                 }
 
-                //producer.beginTransaction();
+                producer.beginTransaction();
                 try {
                     for (KafkaEvent event : events) {
                         // Construct Causal Tags Header
@@ -162,13 +162,13 @@ public class Main {
                     }
                     producer.flush();
 
-                    //producer.commitTransaction();
+                    producer.commitTransaction();
                     emitBuffer.remove(batchId);
                     System.out.printf(">>> [Kafka] Batch %d committed to Kafka.%n", batchId);
 
                 } catch (Exception e) {
                     // if this batch fails, abort
-                    //producer.abortTransaction();
+                    producer.abortTransaction();
                     System.err.println("Batch " + batchId + " failed, aborted.");
                     throw e;
                 }
