@@ -25,7 +25,7 @@ public class Main {
         ROUTE_TABLE.loadFromYaml("../MarketplaceOnDapr/dapr.yaml");
 
 
-        KafkaSubscriber subscriber = new KafkaSubscriber("localhost:9092");
+        KafkaSubscriber subscriber = new KafkaSubscriber("kafka:9092");
         List<String> topics = ROUTE_TABLE.getDiscoveredTopics();
         if (topics.isEmpty()) {
             System.err.println("[Warning] No Topic！Please make sure you have /dapr/subscribe api");

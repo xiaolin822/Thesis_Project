@@ -38,7 +38,7 @@ public class RouteTable {
     private void discoverTopics(String appId, int appPort) {
         try {
             // Dapr pub/sub
-            String url = "http://localhost:" + appPort + "/dapr/subscribe";
+            String url = "http://seller-ms:5006/dapr/subscribe";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
@@ -63,7 +63,7 @@ public class RouteTable {
     public String getDaprInvocationUrl(String topic) {
         String appId = topicToAppId.get(topic);
         if (appId == null) return null;
-        return String.format("http://localhost:%d/v1.0/invoke/%s/method/Process%s",
+        return String.format("http://seller-dapr:3506/v1.0/invoke/seller-ms/method/ProcessX",
                 daprPorts.get(appId), appId, topic);
     }
 
