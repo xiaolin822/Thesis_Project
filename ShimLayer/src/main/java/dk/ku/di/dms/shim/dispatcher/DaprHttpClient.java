@@ -48,6 +48,7 @@ public class DaprHttpClient {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(event.payload()))
                 .build();
+        System.out.println(event.payload());
 
         // Both async invocation and its subsequent pipeline execution run within the daprExecutor context
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
